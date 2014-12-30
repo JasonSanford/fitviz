@@ -1,0 +1,30 @@
+{
+  "name": "hr-viz",
+  "version": "0.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/JasonSanford/hr-viz.git"
+  },
+  "author": "Jason Sanford",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JasonSanford/hr-viz/issues"
+  },
+  "homepage": "https://github.com/JasonSanford/hr-viz",
+  "dependencies": {
+    "express": "~4.10.6",
+    "passport": "~0.2.1",
+    "passport-mapmyfitness": "~1.0.3",
+    "morgan": "~1.5.0",
+    "express-session": "~1.9.3",
+    "body-parser": "~1.10.0",
+    "cookie-parser": "~1.3.3",
+    "method-override": "~2.3.0",
+    "jade": "~1.8.2"
+  }
+}
