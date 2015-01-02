@@ -1,0 +1,19 @@
+nav.navbar
+  div(class='row', id='nav1')
+    a(class='toggle', gumby-trigger='#nav1 > ul', href='#')
+      i(class='icon-menu')
+    h1(class='four columns logo')
+      a(href='/') HR Viz
+    nav.pull_right
+      ul
+        li
+          if user
+            a(href='#') #{user.name}
+            .dropdown
+              ul
+                li
+                  a(href='#settings') Settings
+                li
+                  a(href='/sign_out') Sign Out
+          else
+            a(href='/auth/mapmyfitness') Sign In

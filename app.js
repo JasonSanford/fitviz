@@ -71,15 +71,7 @@ orm.connect(connectionString, function (error, db) {
   app.get(
     '/',
     function(req, resp) {
-      resp.render('index', {});
-    }
-  );
-
-  app.get(
-    '/account',
-    ensureAuthenticated,
-    function (req, resp) {
-      resp.render('account', { user: req.user });
+      resp.render('index', { user: req.user });
     }
   );
 
@@ -96,7 +88,7 @@ orm.connect(connectionString, function (error, db) {
     '/auth/mapmyfitness/callback',
     passport.authenticate('mapmyfitness', { failureRedirect: '/' }),
     function (req, resp) {
-      resp.redirect('/account');
+      resp.redirect('/');
     }
   );
 

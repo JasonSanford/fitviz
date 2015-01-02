@@ -1,8 +1,11 @@
-doctype html
-html(lang='en')
-  head
-    title Heyo
-  body
-    h1 Hi everyone
-    a(href='/auth/mapmyfitness') Sign in with MapMyFitness
-    script(src='js/main.js')
+extends base
+
+block content
+  if user
+    .row
+      h2 Hi #{user.name}
+  else
+    .row
+      .six.columns.centered.content-centered
+        .medium.btn.primary
+          a(href='/auth/mapmyfitness') Sign in with MapMyFitness
