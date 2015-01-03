@@ -92,19 +92,13 @@ orm.connect(connectionString, function (error, db) {
     function (req, resp) {
 
       var pageInfo = getPageInfo(req);
-      var featureCollection = {
-        type: 'FeatureCollection',
-        page: pageInfo.page,
-        per_page: pageInfo.perPage
-      };
 
       mmfProvider.getWorkouts(req.user, pageInfo, function (error, workouts) {
         if (error) {
           resp.status(500);
           resp.json({ error: error.message });
         } else {
-          featureCollection.features = workouts;
-          resp.json(featureCollection);
+          resp.json(workouts);
         }
       });
     }
@@ -140,7 +134,7 @@ orm.connect(connectionString, function (error, db) {
     var user;
     var userParams = {
       provider: profile.provider,
-      provider_id: profile.id
+      provider_id: profile.id.toString()
     };
     User.find(userParams, 1, function (error, results) {
       if (error) {
