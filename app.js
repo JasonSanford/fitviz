@@ -8,10 +8,12 @@ var cookieParser   = require('cookie-parser');
 var methodOverride = require('method-override');
 var jade           = require('jade');
 var orm            = require('orm');
+var RedisStore     = require('connect-redis')(session);
 
-var constants = require('./constants');
+var constants        = require('./constants');
 var connectionString = require('./db/connection_string');
 var modelDefinitions = require('./db/model_definitions');
+var mmfProvider      = require ('./providers/mapmyfitness');
 
 function ensureAuthenticated (req, resp, next) {
     if (req.isAuthenticated()) {
@@ -61,7 +63,16 @@ orm.connect(connectionString, function (error, db) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(methodOverride());
-  app.use(session({ secret: 'whatever idc', resave: false, saveUninitialized: true }));
+  app.use(session({
+    secret: 'whatever idc',
+    resave: false,
+    saveUninitialized: false,
+    store: new RedisStore({
+      host: 'localhost',
+      port: 6379,
+      db: 1
+    })
+  }));
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(express.static(__dirname + '/public'));
@@ -72,6 +83,30 @@ orm.connect(connectionString, function (error, db) {
     '/',
     function(req, resp) {
       resp.render('index', { user: req.user });
+    }
+  );
+
+  app.get(
+    '/workouts',
+    ensureAuthenticated,
+    function (req, resp) {
+
+      var pageInfo = getPageInfo(req);
+      var featureCollection = {
+        type: 'FeatureCollection',
+        page: pageInfo.page,
+        per_page: pageInfo.perPage
+      };
+
+      mmfProvider.getWorkouts(req.user, pageInfo, function (error, workouts) {
+        if (error) {
+          resp.status(500);
+          resp.json({ error: error.message });
+        } else {
+          featureCollection.features = workouts;
+          resp.json(featureCollection);
+        }
+      });
     }
   );
 
@@ -130,5 +165,26 @@ orm.connect(connectionString, function (error, db) {
         }
       }
     });
+  }
+
+  function getPageInfo (req) {
+    var perPage = req.param('per_page') || constants.defaultPerPage;
+    var page = req.param('page') || constants.defaultPage;
+
+    perPage = parseInt(perPage, 10);
+    page = parseInt(page, 10);
+
+    if (isNaN(perPage)) {
+      perPage = constants.defaultPerPage;
+    }
+    if (isNaN(page)) {
+      page = constants.defaultPage;
+    }
+
+    if (perPage > constants.maxPerPage) {
+      perPage = constants.maxPerPage;
+    }
+
+    return { page: page, perPage: perPage };
   }
 });

@@ -2,10 +2,6 @@ extends base
 
 block content
   if user
-    .row
-      h2 Hi #{user.name}
+    include ./includes/app
   else
-    .row
-      .six.columns.centered.content-centered
-        .medium.btn.primary
-          a(href='/auth/mapmyfitness') Sign in with MapMyFitness
+    include ./includes/unauthenticated
