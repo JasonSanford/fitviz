@@ -3,10 +3,14 @@ html(lang='en')
   head
     title HR Viz
     link(rel='stylesheet', type='text/css', href='//cdnjs.cloudflare.com/ajax/libs/gumby/2.6.0/css/gumby.min.css')
+    if hasMap
+      link(rel='stylesheet', href='//api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css')
     link(rel='stylesheet', type='text/css', href='css/app.css')
     script(src='//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js')
   body
     include ./includes/navigation
-    block content
     script(src='//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js')
     script(src='//cdnjs.cloudflare.com/ajax/libs/gumby/2.6.0/js/libs/gumby.min.js')
+    if hasMap
+      script(src='//api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js')
+    block content

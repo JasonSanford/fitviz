@@ -82,7 +82,12 @@ orm.connect(connectionString, function (error, db) {
   app.get(
     '/',
     function(req, resp) {
-      resp.render('index', { user: req.user });
+      var context = {
+        user: req.user,
+        hasMap: req.user ? true : false
+      };
+      console.log('Has Map?: ' + JSON.stringify(context));
+      resp.render('index', context);
     }
   );
 
