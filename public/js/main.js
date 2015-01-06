@@ -1,12 +1,15 @@
 var request = require('request');
+var moment  = require('moment');
 
-var utils   = require('./utils');
-var MapView = require('./map_view');
+var constants = require('./constants');
+var utils     = require('./utils');
+var MapView   = require('./map_view');
 
 function App (selector) {
-  this.$div     = $(selector);
-  this.$leftDiv = this.$div.find('.left');
-  this.$mapDiv  = this.$div.find('.right');
+  this.$div                         = $(selector);
+  this.$leftDiv                     = this.$div.find('.left');
+  this.$mapDiv                      = this.$div.find('.right');
+  this.$workoutsTableTemplateMarkup = this.$div.find('.workouts-table-template');
 
   this.resetHeight         = utils.bind(this.resetHeight, this);
   this.getWorkoutsCallback = utils.bind(this.getWorkoutsCallback, this);
@@ -39,7 +42,19 @@ App.prototype.getWorkoutsCallback = function (error, response, body) {
     this.displayError(error);
   } else {
     var workouts = body;
-    this.$leftDiv.text(JSON.stringify(workouts));
+    var workoutsTableHtml = '<table class="striped"><thead><tr><th>Type</th><th>When</th><th>Distance (mi)</th></tr></thead><tbody>';
+    workouts.forEach(function (workout) {
+      var d = new Date(workout.start_date);
+      var fromNow = moment(d).fromNow();
+      var miles = (workout.distance / constants.metersPerMile).toFixed(2);
+      workoutsTableHtml += '<tr>' +
+        '<td>' + workout.type +'</td>' +
+        '<td><span title="' + workout.start_date + '">' + fromNow + '</span></td>' +
+        '<td>' + miles + '</td>' +
+      '</tr>';
+    });
+    workoutsTableHtml += '</tbody></table>';
+    this.$leftDiv.html(workoutsTableHtml);
   }
 };
 

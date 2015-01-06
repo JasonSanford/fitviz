@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "watchify public/js/main.js -o public/js/bundle.js"
+    "watch": "watchify public/js/main.js -o public/js/bundle.js",
+    "build": "browserify public/js/main.js -o public/js/bundle.js",
+    "start": "foreman start"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
     "orm": "~2.1.20",
     "pg": "~4.1.1",
     "connect-redis": "~2.1.0",
-    "request": "~2.51.0"
+    "request": "~2.51.0",
+    "moment": "~2.8.4"
   }
 }

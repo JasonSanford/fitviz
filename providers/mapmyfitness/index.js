@@ -1,6 +1,7 @@
 var request = require('request');
 
-var constants = require('../constants');
+var activityTypes = require('./activity_types');
+var constants = require('../../constants');
 
 function mmfApiRequest (path, params, accessToken, callback) {
   var apiBase = 'https://oauth2-api.mapmyapi.com/v7.0/';
@@ -33,9 +34,18 @@ function getWorkouts (user, pageInfo, callback) {
     } else {
       var mmfWorkouts = body._embedded.workouts;
       var workouts = mmfWorkouts.map(function (mmfWorkout) {
+        var activityType = (function (){
+          var thisActivityType = activityTypes[mmfWorkout._links.activity_type[0].id];
+          if (thisActivityType.id === thisActivityType.rootId) {
+            return thisActivityType.name;
+          } else {
+            return activityTypes[thisActivityType.rootId].name;
+          }
+        }());
         return {
           start_date      : mmfWorkout.start_datetime,
           name            : mmfWorkout.name,
+          type            : activityType,
           id              : mmfWorkout._links.self[0].id,
           has_time_series : mmfWorkout.has_time_series,
           active_time     : mmfWorkout.aggregates.active_time_total,
