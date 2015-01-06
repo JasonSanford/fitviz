@@ -79,7 +79,8 @@ VizApp.prototype.getWorkoutsCallback = function (error, response, body) {
 };
 
 VizApp.prototype.showWorkout = function (workoutId) {
-
+  var me = this;
+  this.mapView.setLoading(true);
 };
 
 VizApp.prototype.displayError = function (error) {
