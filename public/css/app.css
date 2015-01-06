@@ -24,10 +24,26 @@
   margin-left: 500px;
 }
 
+.workouts-table {
+  border: none;
+}
+
 .workout-table .icon-check {
   color: #006600;
 }
 
-.workout-table .icon-cancel {
+.workouts-table .icon-cancel {
   color: #990000;
+}
+
+.workouts-table tr {
+  cursor: pointer;
+}
+
+.workouts-table thead tr {
+  background-color: #b0b0b0;
+}
+
+.workouts-table tr:hover {
+  background-color: #b0b0b0 !important;
 }
