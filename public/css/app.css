@@ -15,11 +15,19 @@
 }
 
 .app .left {
-  width: 400px;
+  width: 500px;
   float: left;
   overflow-y: auto;
 }
 
 .app .right {
-  margin-left: 400px;
+  margin-left: 500px;
+}
+
+.workout-table .icon-check {
+  color: #006600;
+}
+
+.workout-table .icon-cancel {
+  color: #990000;
 }

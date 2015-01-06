@@ -28892,14 +28892,8 @@ module.exports = Request
 },{"./lib/cookies":3,"./lib/copy":4,"./lib/debug":5,"./lib/helpers":6,"_process":217,"aws-sign2":7,"bl":8,"buffer":97,"caseless":19,"combined-stream":20,"forever-agent":22,"form-data":23,"hawk":28,"http":209,"http-signature":43,"https":213,"mime-types":60,"net":81,"node-uuid":63,"oauth-sign":64,"qs":65,"querystring":221,"stream":233,"stringstream":70,"tunnel-agent":75,"url":235,"util":237,"zlib":96}],77:[function(require,module,exports){
 module.exports = {
   mapboxAccessToken : 'pk.eyJ1IjoiamNzYW5mb3JkIiwiYSI6InRJMHZPZFUifQ.F4DMGoNgU3r2AWLY0Eni-w',
-  mapboxMapId       : 'jcsanford.km7kji29',
-  metersPerMile     : 1609.34,
-  activityTypes     : {
-    ride : 'Ride',
-    run  : 'Run',
-    walk : 'Walk',
-    hike : 'Hike'
-  }
+  mapboxMapId       : 'jcsanford.kmdnbkib',
+  metersPerMile     : 1609.34
 };
 
 },{}],78:[function(require,module,exports){
@@ -28947,15 +28941,24 @@ App.prototype.getWorkoutsCallback = function (error, response, body) {
     this.displayError(error);
   } else {
     var workouts = body;
-    var workoutsTableHtml = '<table class="striped"><thead><tr><th>Type</th><th>When</th><th>Distance (mi)</th></tr></thead><tbody>';
+    var workoutsTableHtml = '<table class="workout-table striped"><thead><tr><th>Type</th><th>When</th><th>Distance (mi)</th><th>Avg. HR</th><th>Duration</th></tr></thead><tbody>';
     workouts.forEach(function (workout) {
-      var d = new Date(workout.start_date);
-      var fromNow = moment(d).fromNow();
-      var miles = (workout.distance / constants.metersPerMile).toFixed(2);
+      var d          = new Date(workout.start_date);
+      var fromNow    = moment(d).fromNow();
+      var miles      = (workout.distance / constants.metersPerMile).toFixed(2);
+      var kilometers = (workout.distance / 1000).toFixed(2);
+      var duration   = moment().startOf('day').seconds(workout.elapsed_time);
+      if (duration.hours() > 0) {
+        duration = duration.format('H[h] mm[m] ss[s]');
+      } else {
+        duration = duration.format('mm[m] ss[s]');
+      }
       workoutsTableHtml += '<tr>' +
         '<td>' + workout.type +'</td>' +
         '<td><span title="' + workout.start_date + '">' + fromNow + '</span></td>' +
-        '<td>' + miles + '</td>' +
+        '<td><span title="' + kilometers + ' km">' + miles + '</span></td>' +
+        '<td>' + (workout.heart_rate_avg ? workout.heart_rate_avg : '-') + '</td>' +
+        '<td>' + duration + '</td>' +
       '</tr>';
     });
     workoutsTableHtml += '</tbody></table>';

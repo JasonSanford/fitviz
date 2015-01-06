@@ -49,6 +49,7 @@ function getWorkouts (user, pageInfo, callback) {
           id              : mmfWorkout._links.self[0].id,
           has_time_series : mmfWorkout.has_time_series,
           active_time     : mmfWorkout.aggregates.active_time_total,
+          elapsed_time    : mmfWorkout.aggregates.elapsed_time_total,
           distance        : mmfWorkout.aggregates.distance_total,
           heart_rate_avg  : mmfWorkout.aggregates.heartrate_avg,
           heart_rate_max  : mmfWorkout.aggregates.heartrate_max

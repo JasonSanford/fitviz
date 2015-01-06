@@ -42,15 +42,24 @@ App.prototype.getWorkoutsCallback = function (error, response, body) {
     this.displayError(error);
   } else {
     var workouts = body;
-    var workoutsTableHtml = '<table class="striped"><thead><tr><th>Type</th><th>When</th><th>Distance (mi)</th></tr></thead><tbody>';
+    var workoutsTableHtml = '<table class="workout-table striped"><thead><tr><th>Type</th><th>When</th><th>Distance (mi)</th><th>Avg. HR</th><th>Duration</th></tr></thead><tbody>';
     workouts.forEach(function (workout) {
-      var d = new Date(workout.start_date);
-      var fromNow = moment(d).fromNow();
-      var miles = (workout.distance / constants.metersPerMile).toFixed(2);
+      var d          = new Date(workout.start_date);
+      var fromNow    = moment(d).fromNow();
+      var miles      = (workout.distance / constants.metersPerMile).toFixed(2);
+      var kilometers = (workout.distance / 1000).toFixed(2);
+      var duration   = moment().startOf('day').seconds(workout.elapsed_time);
+      if (duration.hours() > 0) {
+        duration = duration.format('H[h] mm[m] ss[s]');
+      } else {
+        duration = duration.format('mm[m] ss[s]');
+      }
       workoutsTableHtml += '<tr>' +
         '<td>' + workout.type +'</td>' +
         '<td><span title="' + workout.start_date + '">' + fromNow + '</span></td>' +
-        '<td>' + miles + '</td>' +
+        '<td><span title="' + kilometers + ' km">' + miles + '</span></td>' +
+        '<td>' + (workout.heart_rate_avg ? workout.heart_rate_avg : '-') + '</td>' +
+        '<td>' + duration + '</td>' +
       '</tr>';
     });
     workoutsTableHtml += '</tbody></table>';
