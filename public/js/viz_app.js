@@ -47,7 +47,7 @@ VizApp.prototype.resetHeight = function () {
 
 VizApp.prototype.getWorkout = function (workoutId) {
   var options = {
-    url: window.location.origin + '/workouts/' + workoutId,
+    url: 'workouts/' + workoutId,
     json: true
   };
   request(options, this.getWorkoutCallback);
@@ -55,7 +55,7 @@ VizApp.prototype.getWorkout = function (workoutId) {
 
 VizApp.prototype.getWorkouts = function (page) {
   var options = {
-    url: window.location.origin + '/workouts',
+    url: 'workouts',
     qs: {
       page: 1
     },
