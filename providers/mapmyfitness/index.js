@@ -3,6 +3,33 @@ var request = require('request');
 var activityTypes = require('./activity_types');
 var constants = require('../../constants');
 
+var metrics = {
+  'lng': {
+    arrayPosition: 0,
+    keyName: 'lng'
+  },
+  'lat': {
+    arrayPosition: 1,
+    keyName: 'lat'
+  },
+  'elevation': {
+    arrayPosition: 2,
+    keyName: 'elevation'
+  },
+  'distance': {
+    arrayPosition: 3,
+    keyName: 'distance'
+  },
+  'heartrate': {
+    arrayPosition: 4,
+    keyName: 'heart_rate'
+  },
+  'speed': {
+    arrayPosition: 5,
+    keyName: 'speed'
+  }
+};
+
 function mmfApiRequest (path, params, accessToken, callback) {
   var apiBase = 'https://oauth2-api.mapmyapi.com/v7.0/';
 
@@ -15,8 +42,65 @@ function mmfApiRequest (path, params, accessToken, callback) {
       'Authorization': 'Bearer ' + accessToken
     }
   };
-  console.log(JSON.stringify(options));
   request(options, callback);
+}
+
+function getWorkout (user, workoutId, callback) {
+  var params = { field_set: 'time_series' };
+  mmfApiRequest('workout/' + workoutId, params, user.access_token, function (error, response, body) {
+    if (error) {
+      callback(error);
+    } else {
+      var positions    = body.time_series.position;
+      var positionsObj = {};
+      positions.forEach(function (position) {
+        var positionIndex = position[0];
+        positionsObj[positionIndex] = position[1];
+      });
+      var metricsKeys = Object.keys(metrics);
+      metricsKeys.forEach(function (metricsKey) {
+        var metric = metrics[metricsKey];
+        var timeSeriesElement = body.time_series[metricsKey];
+        if (timeSeriesElement) {
+          timeSeriesElement.forEach(function (position) {
+            var positionIndex = position[0];
+            if (positionsObj[positionIndex]) {
+              // Only add time series info for known geographic positions
+              positionsObj[positionIndex][metricsKey] = position[1];
+            }
+          });
+        }
+      });
+      var positionsObjKeys = Object.keys(positionsObj);
+      coordinates = positionsObjKeys.map(function (positionsObjKey) {
+        var positionObj = positionsObj[positionsObjKey];
+        var coord = [];
+        metricsKeys.forEach(function (metricsKey) {
+          var metric = metrics[metricsKey];
+          coord[metric.arrayPosition] = ((positionObj[metricsKey] !== undefined) ? positionObj[metricsKey] : null);
+        });
+        return coord;
+      });
+
+      /*
+       * A GeoJSON LineString with extended coordinates to carry extra metrics.
+       *
+      lineString = {
+        type: 'LineString',
+        coordinates: [
+          [longitude, latitude, elevation, distance, heart_rate, speed],
+          ...
+        ]
+      };
+      */
+
+      var lineString = {
+        type: 'LineString',
+        coordinates: coordinates
+      };
+      callback(null, lineString);
+    }
+  });
 }
 
 function getWorkouts (user, pageInfo, callback) {
@@ -61,5 +145,6 @@ function getWorkouts (user, pageInfo, callback) {
 }
 
 module.exports = {
-  getWorkouts: getWorkouts
+  getWorkout  : getWorkout,
+  getWorkouts : getWorkouts
 };

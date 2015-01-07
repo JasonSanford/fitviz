@@ -86,7 +86,6 @@ orm.connect(connectionString, function (error, db) {
         user: req.user,
         hasMap: req.user ? true : false
       };
-      console.log('Has Map?: ' + JSON.stringify(context));
       resp.render('index', context);
     }
   );
@@ -104,6 +103,21 @@ orm.connect(connectionString, function (error, db) {
           resp.json({ error: error.message });
         } else {
           resp.json(workouts);
+        }
+      });
+    }
+  );
+
+  app.get(
+    '/workouts/:workoutId',
+    ensureAuthenticated,
+    function (req, resp) {
+      mmfProvider.getWorkout(req.user, req.param('workoutId'), function (error, workout) {
+        if (error) {
+          resp.status(500);
+          resp.json({ error: error.message });
+        } else {
+          resp.json(workout);
         }
       });
     }

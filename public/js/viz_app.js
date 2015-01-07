@@ -11,6 +11,7 @@ function VizApp (selector) {
   this.$mapDiv  = this.$div.find('.right');
 
   this.resetHeight         = utils.bind(this.resetHeight, this);
+  this.getWorkoutCallback  = utils.bind(this.getWorkoutCallback, this);
   this.getWorkoutsCallback = utils.bind(this.getWorkoutsCallback, this);
 }
 
@@ -18,7 +19,14 @@ VizApp.prototype.initEvents = function () {
   var me = this;
   $(window).on('resize', this.resetHeight);
   this.$leftDiv.on('click', 'table.workouts-table tr', function (event) {
-    var $tr           = $(event.target).parent('tr');
+    var $tr = (function () {
+      if (event.target.tagName.toLowerCase() === 'span') {
+        return $(event.target).parent('td').parent('tr');
+      } else {
+        return $(event.target).parent('tr');
+      }
+    }());
+
     var workoutId     = $tr.data('workout-id');
     var hasTimeSeries = $tr.data('has-time-series');
 
@@ -37,6 +45,14 @@ VizApp.prototype.resetHeight = function () {
   this.$div.height(appHeight);
 };
 
+VizApp.prototype.getWorkout = function (workoutId) {
+  var options = {
+    url: window.location.origin + '/workouts/' + workoutId,
+    json: true
+  };
+  request(options, this.getWorkoutCallback);
+};
+
 VizApp.prototype.getWorkouts = function (page) {
   var options = {
     url: window.location.origin + '/workouts',
@@ -46,6 +62,16 @@ VizApp.prototype.getWorkouts = function (page) {
     json: true
   };
   request(options, this.getWorkoutsCallback);
+};
+
+VizApp.prototype.getWorkoutCallback = function (error, response, body) {
+  if (error) {
+    this.displayError(error);
+  } else {
+    var lineString = body;
+    this.mapView.displayWorkout(lineString);
+  }
+  this.mapView.setLoading(false);
 };
 
 VizApp.prototype.getWorkoutsCallback = function (error, response, body) {
@@ -81,10 +107,12 @@ VizApp.prototype.getWorkoutsCallback = function (error, response, body) {
 VizApp.prototype.showWorkout = function (workoutId) {
   var me = this;
   this.mapView.setLoading(true);
+  this.getWorkout(workoutId);
 };
 
 VizApp.prototype.displayError = function (error) {
   console.log(error.message);
+  window.alert(error.message);
 };
 
 VizApp.prototype.init = function () {
