@@ -1,7 +1,7 @@
 var request = require('request');
 
 var activityTypes = require('./activity_types');
-var constants = require('../../constants');
+var constants     = require('../../constants');
 
 var metrics = {
   'lng': {
@@ -34,12 +34,12 @@ function mmfApiRequest (path, params, accessToken, callback) {
   var apiBase = 'https://oauth2-api.mapmyapi.com/v7.0/';
 
   var options = {
-    uri: apiBase + path,
-    qs: params,
-    json: true,
-    headers: {
-      'Api-Key': constants.mmfApiKey,
-      'Authorization': 'Bearer ' + accessToken
+    uri     : apiBase + path,
+    qs      : params,
+    json    : true,
+    headers : {
+      'Api-Key'       : constants.mmfApiKey,
+      'Authorization' : 'Bearer ' + accessToken
     }
   };
   request(options, callback);
@@ -51,17 +51,28 @@ function getWorkout (user, workoutId, callback) {
     if (error) {
       callback(error);
     } else {
-      var positions    = body.time_series.position;
-      var positionsObj = {};
+      var positions        = body.time_series.position;
+      var positionsObj     = {};
+      var availableMetrics = [];
+      var ignoreMetrics    = ['distance'];
+
       positions.forEach(function (position) {
         var positionIndex = position[0];
         positionsObj[positionIndex] = position[1];
       });
+
       var metricsKeys = Object.keys(metrics);
+
       metricsKeys.forEach(function (metricsKey) {
         var metric = metrics[metricsKey];
         var timeSeriesElement = body.time_series[metricsKey];
+
         if (timeSeriesElement) {
+          if (ignoreMetrics.indexOf(metricsKey) < 0) {
+            // Don't worry about visualizing distance
+            availableMetrics.push(metricsKey);
+          }
+
           timeSeriesElement.forEach(function (position) {
             var positionIndex = position[0];
             if (positionsObj[positionIndex]) {
@@ -71,12 +82,14 @@ function getWorkout (user, workoutId, callback) {
           });
         }
       });
+
       var positionsObjKeys = Object.keys(positionsObj);
+
       coordinates = positionsObjKeys.map(function (positionsObjKey) {
         var positionObj = positionsObj[positionsObjKey];
-        var coord = [];
+        var coord       = [];
         metricsKeys.forEach(function (metricsKey) {
-          var metric = metrics[metricsKey];
+          var metric                  = metrics[metricsKey];
           coord[metric.arrayPosition] = ((positionObj[metricsKey] !== undefined) ? positionObj[metricsKey] : null);
         });
         return coord;
@@ -94,11 +107,23 @@ function getWorkout (user, workoutId, callback) {
       };
       */
 
-      var lineString = {
+      var properties = {
+        available_metrics : availableMetrics,
+        aggregates        : body.aggregates,
+        metrics           : metrics
+      };
+      var geometry = {
         type: 'LineString',
         coordinates: coordinates
       };
-      callback(null, lineString);
+      var feature = {
+        id         : workoutId,
+        type       : 'Feature',
+        properties : properties,
+        geometry   : geometry
+      };
+
+      callback(null, feature);
     }
   });
 }
@@ -107,10 +132,10 @@ function getWorkouts (user, pageInfo, callback) {
   var limit = pageInfo.perPage;
   var offset = pageInfo.page === 1 ? 0 : ((pageInfo.page - 1) * pageInfo.perPage);
   var params = {
-    order_by: '-start_datetime',
-    user: user.provider_id,
-    limit: limit,
-    offset: offset
+    order_by : '-start_datetime',
+    user     : user.provider_id,
+    limit    : limit,
+    offset   : offset
   };
   mmfApiRequest('workout', params, user.access_token, function (error, response, body) {
     if (error) {

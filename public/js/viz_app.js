@@ -18,7 +18,7 @@ function VizApp (selector) {
 VizApp.prototype.initEvents = function () {
   var me = this;
   $(window).on('resize', this.resetHeight);
-  this.$leftDiv.on('click', 'table.workouts-table tr', function (event) {
+  this.$leftDiv.on('click', 'table.workouts-table tbody tr', function (event) {
     var $tr = (function () {
       if (event.target.tagName.toLowerCase() === 'span') {
         return $(event.target).parent('td').parent('tr');
@@ -68,8 +68,8 @@ VizApp.prototype.getWorkoutCallback = function (error, response, body) {
   if (error) {
     this.displayError(error);
   } else {
-    var lineString = body;
-    this.mapView.displayWorkout(lineString);
+    var feature = body;
+    this.mapView.displayWorkout(feature);
   }
   this.mapView.setLoading(false);
 };
