@@ -1,5 +1,6 @@
 var Spinner = require('spin');
 
+var Rainbow   = require('./rainbow');
 var constants = require('./constants');
 
 function MapView ($mapDiv) {
@@ -26,12 +27,19 @@ MapView.prototype.setLoading = function (loading) {
 
 MapView.prototype.displayWorkout = function (lineString) {
   var me = this;
+
+  var rainbow = new Rainbow();
+  rainbow.setNumberRange(90, 200);
+  rainbow.setSpectrum('ffffb2', 'fecc5c', 'fd8d3c', 'f03b20', 'bd0026');
+
   this.featureGroup.clearLayers();
   lineString.coordinates.forEach(function (coordinate) {
+    var color = rainbow.colourAt(coordinate[4]);
     var pathOptions = {
       radius: 5,
       stroke: false,
-      fillColor: '#ff7800'
+      fillColor: '#' + color,
+      fillOpacity: 0.8
     };
     var circleMarker = new L.CircleMarker([coordinate[1], coordinate[0]], pathOptions);
     me.featureGroup.addLayer(circleMarker);
