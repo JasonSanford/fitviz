@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "watchify public/js/main.js -o public/js/bundle.js",
-    "build": "browserify public/js/main.js -o public/js/bundle.js",
+    "build": "browserify public/js/main.js | uglifyjs > public/js/bundle.js",
     "start": "foreman start"
   },
   "repository": {
@@ -35,5 +35,9 @@
     "request": "~2.51.0",
     "moment": "~2.8.4",
     "spin": "0.0.1"
+  },
+  "devDependencies": {
+    "browserify": "~8.0.3",
+    "uglify-js": "~2.4.15"
   }
 }

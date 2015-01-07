@@ -39,6 +39,8 @@ MapView.prototype.displayWorkout = function (feature) {
   rainbow.setNumberRange(displayMetricMinValue, displayMetricMaxValue);
   //rainbow.setSpectrum('ffffb2', 'fecc5c', 'fd8d3c', 'f03b20', 'bd0026');
   rainbow.setSpectrum('66ccff', '3333ff', '0000cc', 'ffffcc', 'ffff00', 'ffcc66', 'ff9900', 'ff3300', 'ffffff');
+  //rainbow.setSpectrum('000000', '0000ff', '00ffff', '00ff00', 'ffff00', 'ff0000', 'ffffff');
+  //rainbow.setSpectrum('0000ff', 'ff0000');
 
   this.featureGroup.clearLayers();
   lineString.coordinates.forEach(function (coordinate) {
