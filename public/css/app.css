@@ -32,6 +32,27 @@
   z-index: 400;
 }
 
+.app .right .metric-picker {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 10px;
+  background-color: #4A4D50;
+  margin: 10px;
+  z-index: 390;
+  border-radius: 2px;
+  display: none;
+}
+
+.app .right .metric-picker label {
+  display: block;
+  color: #fff;
+}
+
+.app .right .metric-picker input {
+  margin-right: 10px;
+}
+
 .workouts-table {
   border: none;
 }

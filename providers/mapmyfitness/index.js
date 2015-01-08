@@ -6,27 +6,27 @@ var constants     = require('../../constants');
 var metrics = {
   'lng': {
     arrayPosition: 0,
-    keyName: 'lng'
+    display: 'Longitude'
   },
   'lat': {
     arrayPosition: 1,
-    keyName: 'lat'
+    display: 'Latitude'
   },
   'elevation': {
     arrayPosition: 2,
-    keyName: 'elevation'
+    display: 'Elevation'
   },
   'distance': {
     arrayPosition: 3,
-    keyName: 'distance'
+    display: 'Distance'
   },
   'heartrate': {
     arrayPosition: 4,
-    keyName: 'heart_rate'
+    display: 'Heart Rate'
   },
   'speed': {
     arrayPosition: 5,
-    keyName: 'speed'
+    display: 'Speed'
   }
 };
 
