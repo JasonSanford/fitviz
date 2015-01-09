@@ -24,8 +24,11 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
   this.clearCurrentMetric();
 
   var displayMetric         = this.metrics[displayMetricKey];
-  var displayMetricMinValue = this.aggregates[displayMetricKey + '_min'];
   var displayMetricMaxValue = this.aggregates[displayMetricKey + '_max'];
+  var displayMetricMinValue = this.aggregates[displayMetricKey + '_min'] || displayMetricMaxValue;
+  if (displayMetricMaxValue === displayMetricMinValue) {
+    displayMetricMaxValue += 1;
+  }
 
   var rainbow = new Rainbow();
   rainbow.setNumberRange(displayMetricMinValue, displayMetricMaxValue);
@@ -43,6 +46,23 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
       fillOpacity : 0.8
     };
     var circleMarker = new L.CircleMarker([coordinate[1], coordinate[0]], pathOptions);
+    circleMarker.coordinate = coordinate;
+    circleMarker.on('mouseover', function (event) {
+      var metricsDivHtml = [];
+      me.availableMetrics.forEach(function (availableMetricKey) {
+        var metric = me.metrics[availableMetricKey];
+        metricsDivHtml.push(
+          '<p>' +
+            metric.display + ': <strong>' + coordinate[metric.arrayPosition] + '</strong>' +
+          '</p>'
+        );
+      });
+      me.mapView.$metricsDiv.html(metricsDivHtml.join(''));
+      me.mapView.setMetricsVisibility(true);
+    });
+    circleMarker.on('mouseout', function (event) {
+      me.mapView.setMetricsVisibility(false);
+    });
     me.mapView.featureGroup.addLayer(circleMarker);
   });
 
@@ -50,14 +70,17 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
     this.mapView.map.fitBounds(this.mapView.featureGroup.getBounds());
   }
 
-  var metricsDivHtml = [];
+  var metricsPickerDivHtml = [];
   this.availableMetrics.forEach(function (metricKey) {
     var metric = me.metrics[metricKey];
-    metricsDivHtml.push(
-      '<label><input type="radio" name="metric" value="' + metricKey + '"' + (metricKey === displayMetricKey ? ' checked' : '') + '>' + metric.display +'</label>'
+    metricsPickerDivHtml.push(
+      '<label>' +
+        '<input type="radio" name="metric" value="' + metricKey + '"' + (metricKey === displayMetricKey ? ' checked' : '') + '>' + metric.display +
+      '</label>'
     );
   });
-  this.mapView.$metricsDiv.html(metricsDivHtml.join(''));
+  this.mapView.$metricsPickerDiv.html(metricsPickerDivHtml.join(''));
+  this.mapView.setMetricsPickerVisibility(true);
 };
 
 WorkoutDisplay.prototype.destroy = function () {

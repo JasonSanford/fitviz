@@ -4,9 +4,10 @@ var constants      = require('./constants');
 var WorkoutDisplay = require('./workout_display');
 
 function MapView ($mapDiv) {
-  this.$mapDiv     = $mapDiv;
-  this.$spinnerDiv = $mapDiv.find('.spinner-container');
-  this.$metricsDiv = $mapDiv.find('.metric-picker');
+  this.$mapDiv           = $mapDiv;
+  this.$spinnerDiv       = $mapDiv.find('.spinner-container');
+  this.$metricsPickerDiv = $mapDiv.find('.metric-picker');
+  this.$metricsDiv       = $mapDiv.find('.metrics');
 }
 
 MapView.prototype.init = function () {
@@ -20,7 +21,7 @@ MapView.prototype.init = function () {
 MapView.prototype.initEvents = function () {
   var me = this;
 
-  this.$metricsDiv.on('click', 'input', function (event) {
+  this.$metricsPickerDiv.on('click', 'input', function (event) {
     var $input = $(event.target);
     me.workoutDisplay.setDisplayMetric($input.val(), false);
   });
@@ -36,8 +37,12 @@ MapView.prototype.setLoading = function (loading) {
   }
 };
 
-MapView.prototype.setMetricsPickerVisibility = function (shouldBeVisible) {
+MapView.prototype.setMetricsVisibility = function (shouldBeVisible) {
   this.$metricsDiv[shouldBeVisible ? 'show' : 'hide']();
+};
+
+MapView.prototype.setMetricsPickerVisibility = function (shouldBeVisible) {
+  this.$metricsPickerDiv[shouldBeVisible ? 'show' : 'hide']();
 };
 
 MapView.prototype.displayWorkout = function (feature) {

@@ -27,6 +27,14 @@ var metrics = {
   'speed': {
     arrayPosition: 5,
     display: 'Speed'
+  },
+  'cadence': {
+    arrayPosition: 6,
+    display: 'Cadence'
+  },
+  'power': {
+    arrayPosition: 7,
+    display: 'Power'
   }
 };
 

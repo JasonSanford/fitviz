@@ -32,16 +32,33 @@
   z-index: 400;
 }
 
-.app .right .metric-picker {
+.app .right .metrics, .app .right .metric-picker {
   position: absolute;
-  top: 0;
-  right: 0;
   padding: 10px;
   background-color: #4A4D50;
   margin: 10px;
   z-index: 390;
   border-radius: 2px;
   display: none;
+}
+
+.app .right .metrics {
+  bottom: 0;
+  left: 0;
+  color: #fff;
+}
+
+.app .right .metrics p {
+  margin-bottom: 5px;
+}
+
+.app .right .metrics p:last-child {
+  margin-bottom: 0;
+}
+
+.app .right .metric-picker {
+  top: 0;
+  right: 0;
 }
 
 .app .right .metric-picker label {
