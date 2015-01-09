@@ -1,4 +1,5 @@
 var Rainbow = require('./rainbow');
+var utils   = require('./utils');
 
 function WorkoutDisplay (feature, mapView) {
   var properties = feature.properties;
@@ -52,11 +53,24 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
       me.availableMetrics.forEach(function (availableMetricKey) {
         event.target.setStyle($.extend({}, pathOptions, { stroke: true, color: '#333', weight: 2 }));
         var metric = me.metrics[availableMetricKey];
-        metricsDivHtml.push(
-          '<p>' +
-            metric.display + ': <strong>' + coordinate[metric.arrayPosition] + '</strong>' +
-          '</p>'
-        );
+        if (availableMetricKey === 'speed') {
+          metricsDivHtml.push(
+            '<p>' +
+              'Speed: <strong>' + utils.metersPerSecondToMilesPerHour(coordinate[metric.arrayPosition]).toFixed(2) + '</strong> mph' +
+            '</p>'
+          );
+          metricsDivHtml.push(
+            '<p>' +
+              'Pace: <strong>' + utils.minutesPerMileToMMSS(utils.metersPerSecondToMinutesPerMile(coordinate[metric.arrayPosition])) + '</strong> min/mi' +
+            '</p>'
+          );
+        } else {
+          metricsDivHtml.push(
+            '<p>' +
+              metric.display + ': <strong>' + coordinate[metric.arrayPosition] + '</strong>' + (metric.unit ? ' ' + metric.unit : '') +
+            '</p>'
+          );
+        }
       });
       me.mapView.$metricsDiv.html(metricsDivHtml.join(''));
       me.mapView.setMetricsVisibility(true);

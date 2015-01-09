@@ -22,7 +22,8 @@ var metrics = {
   },
   'heartrate': {
     arrayPosition: 4,
-    display: 'Heart Rate'
+    display: 'Heart Rate',
+    unit: 'bpm'
   },
   'speed': {
     arrayPosition: 5,
@@ -30,11 +31,13 @@ var metrics = {
   },
   'cadence': {
     arrayPosition: 6,
-    display: 'Cadence'
+    display: 'Cadence',
+    unit: 'rpm'
   },
   'power': {
     arrayPosition: 7,
-    display: 'Power'
+    display: 'Power',
+    unit: 'watts'
   }
 };
 
