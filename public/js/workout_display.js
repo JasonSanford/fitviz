@@ -55,18 +55,18 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
         var metric = me.metrics[availableMetricKey];
         if (availableMetricKey === 'speed') {
           metricsDivHtml.push(
-            '<p>' +
+            '<p' + (displayMetricKey === availableMetricKey ? ' style="background-color: #C03D20;"' : '') + '>' +
               'Speed: <strong>' + utils.metersPerSecondToMilesPerHour(coordinate[metric.arrayPosition]).toFixed(2) + '</strong> mph' +
             '</p>'
           );
           metricsDivHtml.push(
-            '<p>' +
+            '<p' + (displayMetricKey === availableMetricKey ? ' style="background-color: #C03D20;"' : '') + '>' +
               'Pace: <strong>' + utils.minutesPerMileToMMSS(utils.metersPerSecondToMinutesPerMile(coordinate[metric.arrayPosition])) + '</strong> min/mi' +
             '</p>'
           );
         } else {
           metricsDivHtml.push(
-            '<p>' +
+            '<p' + (displayMetricKey === availableMetricKey ? ' style="background-color: #C03D20;"' : '') + '>' +
               metric.display + ': <strong>' + coordinate[metric.arrayPosition] + '</strong>' + (metric.unit ? ' ' + metric.unit : '') +
             '</p>'
           );

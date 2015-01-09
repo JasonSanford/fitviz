@@ -98,10 +98,14 @@ VizApp.prototype.getWorkoutsCallback = function (error, response, body, page) {
       var miles      = (workout.distance / constants.metersPerMile).toFixed(2);
       var kilometers = (workout.distance / 1000).toFixed(2);
       var duration   = moment().startOf('day').seconds(workout.elapsed_time);
-      if (duration.hours() > 0) {
-        duration = duration.format('H[h] mm[m] ss[s]');
+      if (duration) {
+        if (duration.hours() > 0) {
+          duration = duration.format('H[h] mm[m] ss[s]');
+        } else {
+          duration = duration.format('mm[m] ss[s]');
+        }
       } else {
-        duration = duration.format('mm[m] ss[s]');
+        duration = '-';
       }
       workoutsTableHtml += '<tr data-workout-id="' + workout.id + '" data-has-time-series="' + workout.has_time_series + '">' +
         '<td>' + workout.type +'</td>' +

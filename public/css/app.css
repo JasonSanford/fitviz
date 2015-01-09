@@ -53,6 +53,8 @@
 
 .app .right .metrics p {
   margin-bottom: 5px;
+  border-radius: 2px;
+  padding: 2px 8px;
 }
 
 .app .right .metrics p:last-child {
