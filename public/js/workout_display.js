@@ -40,16 +40,17 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
   this.lineString.coordinates.forEach(function (coordinate) {
     var color = rainbow.colourAt(coordinate[displayMetric.arrayPosition]);
     var pathOptions = {
-      radius      : 5,
+      radius      : 7,
       stroke      : false,
       fillColor   : '#' + color,
-      fillOpacity : 0.8
+      fillOpacity : 1
     };
     var circleMarker = new L.CircleMarker([coordinate[1], coordinate[0]], pathOptions);
     circleMarker.coordinate = coordinate;
     circleMarker.on('mouseover', function (event) {
       var metricsDivHtml = [];
       me.availableMetrics.forEach(function (availableMetricKey) {
+        event.target.setStyle($.extend({}, pathOptions, { stroke: true, color: '#333', weight: 2 }));
         var metric = me.metrics[availableMetricKey];
         metricsDivHtml.push(
           '<p>' +
@@ -61,6 +62,7 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
       me.mapView.setMetricsVisibility(true);
     });
     circleMarker.on('mouseout', function (event) {
+      event.target.setStyle(pathOptions);
       me.mapView.setMetricsVisibility(false);
     });
     me.mapView.featureGroup.addLayer(circleMarker);
