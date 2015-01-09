@@ -10,6 +10,11 @@
   margin-bottom: 0;
 }
 
+.spinner-container {
+  position: relative;
+  background-color: rgba(50, 50, 50, 0.5);
+}
+
 .app {
 
 }
@@ -26,10 +31,8 @@
 }
 
 .app .right .spinner-container {
-  display: none;
-  position: relative;
-  background-color: rgba(50, 50, 50, 0.5);
   z-index: 400;
+  display: none;
 }
 
 .app .right .metrics, .app .right .metric-picker {
@@ -92,4 +95,47 @@
 
 .workouts-table tr:hover {
   background-color: #b0b0b0 !important;
+}
+
+.pagination ul {
+  display: inline-block;
+}
+
+.pagination ul li {
+  display: inline;
+}
+
+.pagination ul li a, .pagination ul li span {
+  float: left;
+  padding: 4px 12px;
+  text-decoration: none;
+  border: 1px solid #C03D20;
+  border-left-width: 0;
+}
+
+.pagination ul li a {
+  color: #C03D20;
+}
+
+.pagination ul li a:hover, .pagination ul li a:focus {
+  background-color: #C03D20;
+  color: #fff;
+}
+
+.pagination ul li:first-child a, .pagination ul li:first-child span {
+  border-left-width: 1px;
+}
+
+.pagination ul li .active a, .pagination ul li .active span {
+  background-color: #ff7800;
+  color: #333;
+  cursor: default;
+}
+
+.pagination-center {
+  text-align: center;
+}
+
+.pagination-right {
+  text-align: right;
 }

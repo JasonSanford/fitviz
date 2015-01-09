@@ -96,7 +96,7 @@ orm.connect(connectionString, function (error, db) {
     function (req, resp) {
 
       var pageInfo = getPageInfo(req);
-
+      console.log('pageInfo: ' + JSON.stringify(pageInfo));
       mmfProvider.getWorkouts(req.user, pageInfo, function (error, workouts) {
         if (error) {
           resp.status(500);
@@ -181,11 +181,11 @@ orm.connect(connectionString, function (error, db) {
   }
 
   function getPageInfo (req) {
-    var perPage = req.param('per_page') || constants.defaultPerPage;
-    var page = req.param('page') || constants.defaultPage;
+    var perPage = req.query.per_page || constants.defaultPerPage;
+    var page    = req.query.page     || constants.defaultPage;
 
     perPage = parseInt(perPage, 10);
-    page = parseInt(page, 10);
+    page    = parseInt(page, 10);
 
     if (isNaN(perPage)) {
       perPage = constants.defaultPerPage;
