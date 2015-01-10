@@ -31,6 +31,11 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
     displayMetricMaxValue += 1;
   }
 
+  if (!(displayMetricMinValue && displayMetricMaxValue)) {
+    window.alert('This workout has no time series data and cannot be shown.');
+    return;
+  }
+
   var rainbow = new Rainbow();
   rainbow.setNumberRange(displayMetricMinValue, displayMetricMaxValue);
   //rainbow.setSpectrum('ffffb2', 'fecc5c', 'fd8d3c', 'f03b20', 'bd0026');
