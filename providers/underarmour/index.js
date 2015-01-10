@@ -41,15 +41,15 @@ var metrics = {
   }
 };
 
-function mmfApiRequest (path, params, accessToken, callback) {
-  var apiBase = 'https://oauth2-api.mapmyapi.com/v7.0/';
+function uaApiRequest (path, params, accessToken, callback) {
+  var apiBase = 'https://api.ua.com/v7.0/';
 
   var options = {
     uri     : apiBase + path,
     qs      : params,
     json    : true,
     headers : {
-      'Api-Key'       : constants.mmfApiKey,
+      'Api-Key'       : constants.uaApiKey,
       'Authorization' : 'Bearer ' + accessToken
     }
   };
@@ -58,7 +58,7 @@ function mmfApiRequest (path, params, accessToken, callback) {
 
 function getWorkout (user, workoutId, callback) {
   var params = { field_set: 'time_series' };
-  mmfApiRequest('workout/' + workoutId, params, user.access_token, function (error, response, body) {
+  uaApiRequest('workout/' + workoutId, params, user.access_token, function (error, response, body) {
     if (error) {
       callback(error);
     } else {
@@ -148,14 +148,14 @@ function getWorkouts (user, pageInfo, callback) {
     limit    : limit,
     offset   : offset
   };
-  mmfApiRequest('workout', params, user.access_token, function (error, response, body) {
+  uaApiRequest('workout', params, user.access_token, function (error, response, body) {
     if (error) {
       callback(error);
     } else {
-      var mmfWorkouts = body._embedded.workouts;
-      var workouts = mmfWorkouts.map(function (mmfWorkout) {
+      var uaWorkouts = body._embedded.workouts;
+      var workouts = uaWorkouts.map(function (uaWorkout) {
         var activityType = (function (){
-          var thisActivityType = activityTypes[mmfWorkout._links.activity_type[0].id];
+          var thisActivityType = activityTypes[uaWorkout._links.activity_type[0].id];
           if (thisActivityType.id === thisActivityType.rootId) {
             return thisActivityType.name;
           } else {
@@ -163,16 +163,16 @@ function getWorkouts (user, pageInfo, callback) {
           }
         }());
         return {
-          start_date      : mmfWorkout.start_datetime,
-          name            : mmfWorkout.name,
+          start_date      : uaWorkout.start_datetime,
+          name            : uaWorkout.name,
           type            : activityType,
-          id              : mmfWorkout._links.self[0].id,
-          has_time_series : mmfWorkout.has_time_series,
-          active_time     : mmfWorkout.aggregates.active_time_total,
-          elapsed_time    : mmfWorkout.aggregates.elapsed_time_total,
-          distance        : mmfWorkout.aggregates.distance_total,
-          heart_rate_avg  : mmfWorkout.aggregates.heartrate_avg,
-          heart_rate_max  : mmfWorkout.aggregates.heartrate_max
+          id              : uaWorkout._links.self[0].id,
+          has_time_series : uaWorkout.has_time_series,
+          active_time     : uaWorkout.aggregates.active_time_total,
+          elapsed_time    : uaWorkout.aggregates.elapsed_time_total,
+          distance        : uaWorkout.aggregates.distance_total,
+          heart_rate_avg  : uaWorkout.aggregates.heartrate_avg,
+          heart_rate_max  : uaWorkout.aggregates.heartrate_max
         };
       });
       callback(null, { workouts: workouts, total_count: body.total_count });

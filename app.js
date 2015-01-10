@@ -1,6 +1,6 @@
 var express        = require('express');
 var passport       = require('passport');
-var MMFStrategy    = require('passport-mapmyfitness').Strategy;
+var UAStrategy     = require('passport-underarmour').Strategy;
 var morgan         = require('morgan');
 var session        = require('express-session');
 var bodyParser     = require('body-parser');
@@ -13,13 +13,14 @@ var RedisStore     = require('connect-redis')(session);
 var constants        = require('./constants');
 var connectionString = require('./db/connection_string');
 var modelDefinitions = require('./db/model_definitions');
-var mmfProvider      = require ('./providers/mapmyfitness');
+var uaProvider       = require('./providers/underarmour');
+var uaRoutes         = require('./providers/underarmour/routes');
 
 function ensureAuthenticated (req, resp, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    resp.redirect('/');
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  resp.redirect('/');
 }
 
 passport.serializeUser(function (user, done) {
@@ -34,10 +35,10 @@ orm.connect(connectionString, function (error, db) {
   if (error) { throw error; }
   var User = db.define('user', modelDefinitions.user);
 
-  var mmfStrategy = new MMFStrategy({
-      clientID     : constants.mmfApiKey,
-      clientSecret : constants.mmfApiSecret,
-      callbackURL  : 'http://localhost:' + constants.port + '/auth/mapmyfitness/callback'
+  var uaStrategy = new UAStrategy({
+      clientID     : constants.uaApiKey,
+      clientSecret : constants.uaApiSecret,
+      callbackURL  : 'http://localhost:' + constants.port + '/auth/underarmour/callback'
     },
     function (accessToken, refreshToken, profile, done) {
       authUser(profile, accessToken, function (error, user) {
@@ -50,7 +51,7 @@ orm.connect(connectionString, function (error, db) {
     }
   );
 
-  passport.use(mmfStrategy);
+  passport.use(uaStrategy);
 
   var app = express();
 
@@ -97,7 +98,7 @@ orm.connect(connectionString, function (error, db) {
 
       var pageInfo = getPageInfo(req);
       console.log('pageInfo: ' + JSON.stringify(pageInfo));
-      mmfProvider.getWorkouts(req.user, pageInfo, function (error, workouts) {
+      uaProvider.getWorkouts(req.user, pageInfo, function (error, workouts) {
         if (error) {
           resp.status(500);
           resp.json({ error: error.message });
@@ -112,7 +113,7 @@ orm.connect(connectionString, function (error, db) {
     '/workouts/:workoutId',
     ensureAuthenticated,
     function (req, resp) {
-      mmfProvider.getWorkout(req.user, req.param('workoutId'), function (error, workout) {
+      uaProvider.getWorkout(req.user, req.param('workoutId'), function (error, workout) {
         if (error) {
           resp.status(500);
           resp.json({ error: error.message });
@@ -123,22 +124,7 @@ orm.connect(connectionString, function (error, db) {
     }
   );
 
-  app.get(
-    '/auth/mapmyfitness',
-    passport.authenticate('mapmyfitness'),
-    function (req, resp) {
-        // The request will be redirected to MMF for authentication, so this
-        // function will not be called.
-    }
-  );
-
-  app.get(
-    '/auth/mapmyfitness/callback',
-    passport.authenticate('mapmyfitness', { failureRedirect: '/' }),
-    function (req, resp) {
-      resp.redirect('/');
-    }
-  );
+  app.use('/auth/underarmour', uaRoutes);
 
   app.get('/sign_out', function (req, resp){
     req.logout();
