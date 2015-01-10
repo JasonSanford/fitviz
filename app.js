@@ -1,6 +1,7 @@
 var express        = require('express');
 var passport       = require('passport');
 var UAStrategy     = require('passport-underarmour').Strategy;
+var StravaStrategy = require('passport-strava').Strategy;
 var morgan         = require('morgan');
 var session        = require('express-session');
 var bodyParser     = require('body-parser');
@@ -15,6 +16,7 @@ var connectionString = require('./db/connection_string');
 var modelDefinitions = require('./db/model_definitions');
 var uaProvider       = require('./providers/underarmour');
 var uaRoutes         = require('./providers/underarmour/routes');
+var stravaRoutes     = require('./providers/strava/routes');
 
 function ensureAuthenticated (req, resp, next) {
   if (req.isAuthenticated()) {
@@ -50,8 +52,24 @@ orm.connect(connectionString, function (error, db) {
       });
     }
   );
-
   passport.use(uaStrategy);
+
+  var stravaStrategy = new StravaStrategy({
+      clientID     : constants.stravaApiKey,
+      clientSecret : constants.stravaApiSecret,
+      callbackURL  : 'http://localhost:' + constants.port + '/auth/strava/callback'
+    },
+    function (accessToken, refreshToken, profile, done) {
+      authUser(profile, accessToken, function (error, user) {
+        if (error) {
+          done(error);
+        } else {
+          done(null, user);
+        }
+      });
+    }
+  );
+  passport.use(stravaStrategy);
 
   var app = express();
 
@@ -125,6 +143,7 @@ orm.connect(connectionString, function (error, db) {
   );
 
   app.use('/auth/underarmour', uaRoutes);
+  app.use('/auth/strava', stravaRoutes);
 
   app.get('/sign_out', function (req, resp){
     req.logout();
