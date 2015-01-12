@@ -175,7 +175,7 @@ function getWorkouts (user, pageInfo, callback) {
           heart_rate_max  : uaWorkout.aggregates.heartrate_max
         };
       });
-      callback(null, { workouts: workouts, total_count: body.total_count });
+      callback(null, workouts);
     }
   });
 }
