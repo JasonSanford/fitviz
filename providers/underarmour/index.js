@@ -27,13 +27,45 @@ function getWorkout (user, workoutId, callback) {
     } else {
       var positions        = body.time_series.position;
       var positionsObj     = {};
-      var availableMetrics = [];
+      var availableMetrics = ['elevation'];
       var ignoreMetrics    = ['distance'];
+      var aggregates       = {};
+      var hasElevation     = false;
 
-      positions.forEach(function (position) {
+      //
+      // First create an object to hold positions with relative indexes (distance along)
+      // since we only want to add other time series values that occur at geographic positions
+      //
+      positions.forEach(function (position, index) {
         var positionIndex = position[0];
-        positionsObj[positionIndex] = position[1];
+        var value         = position[1];
+        positionsObj[positionIndex] = value;
+        if (index === 0 && 'elevation' in value) {  // Should we calculate min/max elevation?
+          hasElevation = true;
+        }
       });
+
+      //
+      // Elevation rides along with lat/lng and doesn't appear with other time series sets
+      // Make a special loop to gather aggregates.
+      //
+      if (hasElevation) {
+        Object.keys(positionsObj).forEach(function (positionsObjKey, index) {
+          var position  = positionsObj[positionsObjKey];
+          var elevation = position.elevation;
+          if (index === 0) {
+            aggregates.elevation_min = elevation;
+            aggregates.elevation_max = elevation;
+          } else {
+            if (elevation < aggregates.elevation_min) {
+              aggregates.elevation_min = elevation;
+            }
+            if (elevation > aggregates.elevation_max) {
+              aggregates.elevation_max = elevation;
+            }
+          }
+        });
+      }
 
       var metricsKeys = Object.keys(metrics);
 
@@ -47,11 +79,22 @@ function getWorkout (user, workoutId, callback) {
             availableMetrics.push(metricsKey);
           }
 
-          timeSeriesElement.forEach(function (position) {
+          timeSeriesElement.forEach(function (position, index) {
             var positionIndex = position[0];
-            if (positionsObj[positionIndex]) {
-              // Only add time series info for known geographic positions
-              positionsObj[positionIndex][metricsKey] = position[1];
+            var value         = position[1];
+            if (positionsObj[positionIndex]) {  // Only add time series info for known geographic positions
+              positionsObj[positionIndex][metricsKey] = value;
+              if (index === 0) {
+                aggregates[metricsKey + '_min'] = value;
+                aggregates[metricsKey + '_max'] = value;
+              } else {
+                if (value < aggregates[metricsKey + '_min']) {
+                  aggregates[metricsKey + '_min'] = value;
+                }
+                if (value > aggregates[metricsKey + '_max']) {
+                  aggregates[metricsKey + '_max'] = value;
+                }
+              }
             }
           });
         }
@@ -83,7 +126,7 @@ function getWorkout (user, workoutId, callback) {
 
       var properties = {
         available_metrics : availableMetrics,
-        aggregates        : body.aggregates,
+        aggregates        : aggregates,
         metrics           : metrics
       };
       var geometry = {
