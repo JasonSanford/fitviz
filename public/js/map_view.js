@@ -11,10 +11,14 @@ function MapView ($mapDiv) {
 }
 
 MapView.prototype.init = function () {
+  var me = this;
   L.mapbox.accessToken = constants.mapboxAccessToken;
   this.map             = L.mapbox.map(this.$mapDiv[0], constants.mapboxMapId);
   this.featureGroup    = new L.FeatureGroup([]);
   this.featureGroup.addTo(this.map);
+  this.map.on('load', function (event) {
+    me.map.setView(new L.LatLng(39.8281, -98.5795));
+  });
   this.initEvents();
 };
 
