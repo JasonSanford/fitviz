@@ -26,15 +26,14 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
 
   var displayMetric         = this.metrics[displayMetricKey];
   var displayMetricMaxValue = this.aggregates[displayMetricKey + '_max'];
-  var displayMetricMinValue = this.aggregates[displayMetricKey + '_min'] || displayMetricMaxValue;
-  if (displayMetricMaxValue === displayMetricMinValue) {
-    displayMetricMaxValue += 1;
-  }
+  var displayMetricMinValue = this.aggregates[displayMetricKey + '_min'];
 
+  /*
   if (!(displayMetricMinValue && displayMetricMaxValue)) {
     window.alert('This workout has no time series data and cannot be shown.');
     return;
   }
+  */
 
   var rainbow = new Rainbow();
   rainbow.setNumberRange(displayMetricMinValue, displayMetricMaxValue);
@@ -67,6 +66,12 @@ WorkoutDisplay.prototype.setDisplayMetric = function (displayMetricKey, firstRun
           metricsDivHtml.push(
             '<p' + (displayMetricKey === availableMetricKey ? ' style="background-color: #C03D20;"' : '') + '>' +
               'Pace: <strong>' + utils.minutesPerMileToMMSS(utils.metersPerSecondToMinutesPerMile(coordinate[metric.arrayPosition])) + '</strong> min/mi' +
+            '</p>'
+          );
+        } else if (availableMetricKey === 'elevation') {
+          metricsDivHtml.push(
+            '<p' + (displayMetricKey === availableMetricKey ? ' style="background-color: #C03D20;"' : '') + '>' +
+              'Elevation: <strong>' + Math.floor(utils.metersToFeet(coordinate[metric.arrayPosition])) + '</strong> ft' +
             '</p>'
           );
         } else {

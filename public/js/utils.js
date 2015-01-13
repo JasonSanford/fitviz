@@ -19,9 +19,14 @@ function minutesPerMileToMMSS (minutesPerMile) {
   return minutes + ':' + (seconds < 10 ? '0' + seconds : seconds);
 }
 
+function metersToFeet (meters) {
+  return meters * 3.28084;
+}
+
 module.exports = {
   bind                            : bind,
   metersPerSecondToMilesPerHour   : metersPerSecondToMilesPerHour,
   metersPerSecondToMinutesPerMile : metersPerSecondToMinutesPerMile,
-  minutesPerMileToMMSS            : minutesPerMileToMMSS
+  minutesPerMileToMMSS            : minutesPerMileToMMSS,
+  metersToFeet                    : metersToFeet
 };

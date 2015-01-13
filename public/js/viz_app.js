@@ -84,12 +84,10 @@ VizApp.prototype.getWorkoutCallback = function (error, response, body) {
   this.mapView.setLoading(false);
 };
 
-VizApp.prototype.getWorkoutsCallback = function (error, response, body, page) {
+VizApp.prototype.getWorkoutsCallback = function (error, response, workouts, page) {
   if (error) {
     this.displayError(error);
   } else {
-    var totalCount        = body.total_count;
-    var workouts          = body.workouts;
     var workoutsTableHtml = '<table class="workouts-table striped"><thead><tr><th>Type</th><th>When</th><th>Distance (mi)</th><th>Avg. HR</th><th>Duration</th></tr></thead><tbody>';
 
     workouts.forEach(function (workout) {
@@ -115,22 +113,18 @@ VizApp.prototype.getWorkoutsCallback = function (error, response, body, page) {
         '<td>' + duration + '</td>' +
       '</tr>';
     });
-
     workoutsTableHtml += '</tbody></table>';
 
-    var totalPages = Math.ceil(totalCount / 20);
-
-    var pageHtml   = '<h3>Page ' + page + ' of ' + totalPages + '</h3><div class="pagination"><ul>';
-    for (var i = 0; i < totalPages; i++) {
-      var currentPage = i + 1;
-      var html = (currentPage === page) ?
-        ('<li class="active"><span>' + currentPage + '</span></li>') :
-        ('<li><a class="page" href="#page-' + currentPage +'" data-page="' + currentPage + '">' + currentPage + '</a></li>');
-      pageHtml += html;
+    var prevNextHtml = [];
+    if (page > 1) {
+      prevNextHtml.push('<div class="prev medium btn info icon-left icon-left-dir"><a class="page" href="#page-' + (page - 1) + '" data-page="' + (page - 1) +'">Prev</a></div>');
     }
-    pageHtml += '</ul></div>';
+    if (workouts.length === 20) {
+      prevNextHtml.push('<div class="medium btn info icon-right icon-right-dir"><a class="page" href="#page-' + (page + 1) + '" data-page="' + (page + 1) +'">Next</a></div>');
+    }
+    prevNextHtml = prevNextHtml.join('');
 
-    this.$leftDiv.html(workoutsTableHtml + pageHtml);
+    this.$leftDiv.html(workoutsTableHtml + '<h3>Page ' + page + '</h3><div class="prevnext">' + prevNextHtml + '</div>');
     this.setLoading(false);
   }
 };

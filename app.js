@@ -1,6 +1,7 @@
 var express        = require('express');
 var passport       = require('passport');
 var UAStrategy     = require('passport-underarmour').Strategy;
+var StravaStrategy = require('passport-strava').Strategy;
 var morgan         = require('morgan');
 var session        = require('express-session');
 var bodyParser     = require('body-parser');
@@ -14,7 +15,15 @@ var constants        = require('./constants');
 var connectionString = require('./db/connection_string');
 var modelDefinitions = require('./db/model_definitions');
 var uaProvider       = require('./providers/underarmour');
+var stravaProvider   = require('./providers/strava');
 var uaRoutes         = require('./providers/underarmour/routes');
+var stravaRoutes     = require('./providers/strava/routes');
+var utils            = require('./utils');
+
+var providerMap = {
+  'underarmour' : uaProvider,
+  'strava'      : stravaProvider
+};
 
 function ensureAuthenticated (req, resp, next) {
   if (req.isAuthenticated()) {
@@ -50,8 +59,24 @@ orm.connect(connectionString, function (error, db) {
       });
     }
   );
-
   passport.use(uaStrategy);
+
+  var stravaStrategy = new StravaStrategy({
+      clientID     : constants.stravaApiKey,
+      clientSecret : constants.stravaApiSecret,
+      callbackURL  : 'http://localhost:' + constants.port + '/auth/strava/callback'
+    },
+    function (accessToken, refreshToken, profile, done) {
+      authUser(profile, accessToken, function (error, user) {
+        if (error) {
+          done(error);
+        } else {
+          done(null, user);
+        }
+      });
+    }
+  );
+  passport.use(stravaStrategy);
 
   var app = express();
 
@@ -95,10 +120,9 @@ orm.connect(connectionString, function (error, db) {
     '/workouts',
     ensureAuthenticated,
     function (req, resp) {
-
-      var pageInfo = getPageInfo(req);
-      console.log('pageInfo: ' + JSON.stringify(pageInfo));
-      uaProvider.getWorkouts(req.user, pageInfo, function (error, workouts) {
+      var pageInfo = utils.getPageInfo(req);
+      var provider = providerMap[req.user.provider];
+      provider.getWorkouts(req.user, pageInfo, function (error, workouts) {
         if (error) {
           resp.status(500);
           resp.json({ error: error.message });
@@ -113,7 +137,8 @@ orm.connect(connectionString, function (error, db) {
     '/workouts/:workoutId',
     ensureAuthenticated,
     function (req, resp) {
-      uaProvider.getWorkout(req.user, req.param('workoutId'), function (error, workout) {
+      var provider = providerMap[req.user.provider];
+      provider.getWorkout(req.user, req.param('workoutId'), function (error, workout) {
         if (error) {
           resp.status(500);
           resp.json({ error: error.message });
@@ -125,6 +150,7 @@ orm.connect(connectionString, function (error, db) {
   );
 
   app.use('/auth/underarmour', uaRoutes);
+  app.use('/auth/strava', stravaRoutes);
 
   app.get('/sign_out', function (req, resp){
     req.logout();
@@ -164,26 +190,5 @@ orm.connect(connectionString, function (error, db) {
         }
       }
     });
-  }
-
-  function getPageInfo (req) {
-    var perPage = req.query.per_page || constants.defaultPerPage;
-    var page    = req.query.page     || constants.defaultPage;
-
-    perPage = parseInt(perPage, 10);
-    page    = parseInt(page, 10);
-
-    if (isNaN(perPage)) {
-      perPage = constants.defaultPerPage;
-    }
-    if (isNaN(page)) {
-      page = constants.defaultPage;
-    }
-
-    if (perPage > constants.maxPerPage) {
-      perPage = constants.maxPerPage;
-    }
-
-    return { page: page, perPage: perPage };
   }
 });
