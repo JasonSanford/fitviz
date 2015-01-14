@@ -57,7 +57,9 @@ orm.connect(connectionString, function (error, db) {
   var uaStrategy = new UAStrategy({
       clientID     : constants.uaApiKey,
       clientSecret : constants.uaApiSecret,
-      callbackURL  : 'http://localhost:' + constants.port + '/auth/underarmour/callback'
+      callbackURL  : process.env.DEVELOPMENT ?
+        ('http://localhost:' + constants.port + '/auth/underarmour/callback') :
+        'http://fitviz.website/auth/underarmour/callback'
     },
     function (accessToken, refreshToken, profile, done) {
       authUser(profile, accessToken, function (error, user) {
@@ -74,7 +76,9 @@ orm.connect(connectionString, function (error, db) {
   var stravaStrategy = new StravaStrategy({
       clientID     : constants.stravaApiKey,
       clientSecret : constants.stravaApiSecret,
-      callbackURL  : 'http://localhost:' + constants.port + '/auth/strava/callback'
+      callbackURL  : process.env.DEVELOPMENT ?
+        ('http://localhost:' + constants.port + '/auth/strava/callback') :
+        'http://fitviz.website/auth/strava/callback'
     },
     function (accessToken, refreshToken, profile, done) {
       authUser(profile, accessToken, function (error, user) {
