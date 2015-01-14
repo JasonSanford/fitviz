@@ -40,6 +40,16 @@ passport.deserializeUser(function (obj, done) {
   done(null, obj);
 });
 
+if (process.env.REDISTOGO_URL) {
+  var redisStore = new RedisStore({url: process.env.REDISTOGO_URL});
+} else {
+  var redisStore = new RedisStore({
+    host: 'localhost',
+    port: 6379,
+    db: 1
+  });
+}
+
 orm.connect(connectionString, function (error, db) {
   if (error) { throw error; }
   var User = db.define('user', modelDefinitions.user);
@@ -93,11 +103,7 @@ orm.connect(connectionString, function (error, db) {
     secret: 'whatever idc',
     resave: false,
     saveUninitialized: false,
-    store: new RedisStore({
-      host: 'localhost',
-      port: 6379,
-      db: 1
-    })
+    store: redisStore
   }));
   app.use(passport.initialize());
   app.use(passport.session());
