@@ -1,3 +1,3 @@
-## hr-viz
+## FitViz
 
 IDK yet

@@ -1,5 +1,5 @@
 {
-  "name": "hr-viz",
+  "name": "fitviz",
   "version": "0.0.0",
   "description": "",
   "main": "app.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/JasonSanford/hr-viz.git"
+    "url": "git://github.com/JasonSanford/fitviz.git"
   },
   "author": "Jason Sanford",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/JasonSanford/hr-viz/issues"
+    "url": "https://github.com/JasonSanford/fitviz/issues"
   },
-  "homepage": "https://github.com/JasonSanford/hr-viz",
+  "homepage": "https://github.com/JasonSanford/fitviz",
   "browser": {
     "request": "xhr"
   },
