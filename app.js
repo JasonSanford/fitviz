@@ -9,12 +9,7 @@ var cookieParser   = require('cookie-parser');
 var methodOverride = require('method-override');
 var jade           = require('jade');
 var orm            = require('orm');
-
-if (process.env.REDISTOGO_URL) {
-  var RedisStore = require('connect-heroku-redis')(session);
-} else {
-  var RedisStore = require('connect-redis')(session);
-}
+var RedisStore     = require('connect-redis')(session);
 
 var constants        = require('./constants');
 var connectionString = require('./db/connection_string');

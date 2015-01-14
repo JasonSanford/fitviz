@@ -41,8 +41,7 @@
     "spin": "0.0.1",
     "xhr": "~2.0.0",
     "passport-strava": "~0.1.0",
-    "strava-v3": "~1.5.3",
-    "connect-heroku-redis": "~0.1.5"
+    "strava-v3": "~1.5.3"
   },
   "devDependencies": {
     "browserify": "~8.0.3",
