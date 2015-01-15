@@ -1,5 +1,6 @@
+
 nav.navbar
-  div(class='row', id='nav1')
+  div(class='#{fullWidth ? "" : "row"}', id='nav1')
     a(class='toggle', gumby-trigger='#nav1 > ul', href='#')
       i(class='icon-menu')
     h1(class='four columns logo')
@@ -12,7 +13,7 @@ nav.navbar
             .dropdown
               ul
                 li
-                  a(href='#settings') Settings
+                  a(href='/settings') Settings
                 li
                   a(href='/sign_out') Sign Out
           else

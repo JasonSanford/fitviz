@@ -1,0 +1,10 @@
+extends base
+
+block content
+  .row
+    h2 Settings
+    h3 Delete My Account
+    p This is the only setting
+    form(action='/delete', method='post')
+      .medium.danger.btn
+        input(type='submit', value='Delete My Account')

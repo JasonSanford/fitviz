@@ -119,10 +119,37 @@ orm.connect(connectionString, function (error, db) {
     '/',
     function(req, resp) {
       var context = {
-        user: req.user,
-        hasMap: req.user ? true : false
+        user      : req.user,
+        hasMap    : req.user ? true : false,
+        fullWidth : req.user ? true : false
       };
       resp.render('index', context);
+    }
+  );
+
+  app.get(
+    '/settings',
+    ensureAuthenticated,
+    function (req, resp) {
+      var context = {
+        user: req.user
+      };
+      resp.render('settings', context);
+    }
+  );
+
+  app.post(
+    '/delete',
+    ensureAuthenticated,
+    function (req, resp) {
+      User.find({id: req.user.id}).remove(function (error) {
+        if (error) {
+          console.log('Could not remove user: ' + req.user);
+        } else {
+          req.logout();
+        }
+        resp.redirect('/');
+      });
     }
   );
 
