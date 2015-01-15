@@ -146,7 +146,6 @@ VizApp.prototype.showWorkout = function (workoutId) {
 
 VizApp.prototype.displayError = function (error) {
   console.log(error.message);
-  window.alert(error.message);
 };
 
 VizApp.prototype.init = function () {
