@@ -158,7 +158,6 @@ function getWorkouts (user, pageInfo, callback) {
     if (error) {
       callback(error);
     } else {
-      console.log('body: ', JSON.stringify(body));
       var uaWorkouts = body._embedded.workouts;
       var workouts = uaWorkouts.map(function (uaWorkout) {
         var activityType = (function (){
