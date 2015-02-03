@@ -62,7 +62,7 @@ orm.connect(connectionString, function (error, db) {
         'http://fitviz.website/auth/underarmour/callback'
     },
     function (accessToken, refreshToken, profile, done) {
-      authUser(profile, accessToken, function (error, user) {
+      authUser(profile, accessToken, refreshToken, function (error, user) {
         if (error) {
           done(error);
         } else {
@@ -81,7 +81,7 @@ orm.connect(connectionString, function (error, db) {
         'http://fitviz.website/auth/strava/callback'
     },
     function (accessToken, refreshToken, profile, done) {
-      authUser(profile, accessToken, function (error, user) {
+      authUser(profile, accessToken, refreshToken, function (error, user) {
         if (error) {
           done(error);
         } else {
@@ -198,7 +198,7 @@ orm.connect(connectionString, function (error, db) {
     console.log('Listening on port: ' + app.get('port'));
   });
 
-  function authUser (profile, accessToken, cb) {
+  function authUser (profile, accessToken, refreshToken, cb) {
     var user;
     var userParams = {
       provider: profile.provider,
@@ -214,9 +214,12 @@ orm.connect(connectionString, function (error, db) {
           cb(null, user);
         } else {
           console.log('Creating user: ' + profile.provider + ':' + profile.id);
-          userParams.access_token = accessToken;
-          userParams.profile = profile;
-          userParams.name = profile.displayName;
+
+          userParams.access_token  = accessToken;
+          userParams.refresh_token = refreshToken;
+          userParams.profile       = profile;
+          userParams.name          = profile.displayName;
+
           User.create(userParams, function (error, user) {
             if (error) {
               cb(error);
