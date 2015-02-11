@@ -115,7 +115,7 @@ VizApp.prototype.getWorkoutsCallback = function (error, response, workouts, page
         duration = '-';
       }
       workoutsTableHtml += '<tr data-workout-id="' + workout.id + '" data-has-time-series="' + workout.has_time_series + '">' +
-        '<td>' + workout.type +'</td>' +
+        '<td>' + (workout.type === 'Run / Jog' ? 'Run' : workout.type) +'</td>' +
         '<td><span title="' + workout.start_date + '">' + fromNow + '</span></td>' +
         '<td><span title="' + kilometers + ' km">' + miles + '</span></td>' +
         '<td>' + (workout.heart_rate_avg ? workout.heart_rate_avg : '-') + '</td>' +
