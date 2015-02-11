@@ -10,78 +10,97 @@ var normalizedMetrics = {
 function getWorkout (user, workoutId, callback) {
   var params = {
     access_token : user.access_token,
-    id           : workoutId,
-    types        : 'latlng,altitude,heartrate,cadence,watts'
+    id           : workoutId
   };
-  strava.streams.activity(params, function (error, streams) {
+  strava.activities.get(params, function (error, activity) {
     if (error) {
       return callback(error);
     }
 
-    var i, coordinates, coordinatesStream;
-    var availableMetrics = [];
-    var aggregates       = {};
-    var ignoreMetrics    = ['distance'];
-
-    for (i = 0; i < streams.length; i++) {
-      stream = streams[i];
-      if (stream.type === 'latlng') {
-        coordinatesStream = streams[i];
-        break;
+    params.types = 'latlng,altitude,heartrate,cadence,watts';
+    strava.streams.activity(params, function (error, streams) {
+      if (error) {
+        return callback(error);
       }
-    }
 
-    coordinates = coordinatesStream.data.map(function (latLng) {
-      return [latLng[1], latLng[0]];
-    });
+      var i, coordinates, coordinatesStream;
+      var availableMetrics = [];
+      var aggregates       = {};
+      var ignoreMetrics    = ['distance'];
 
-    streams.forEach(function (stream) {
-      var normalizedMetricKey;
-      if (stream.type !== 'latlng') {  // We already handled latlng
-        if (stream.type in metrics || stream.type in normalizedMetrics) {
-          if (stream.type in metrics) {
-            normalizedMetricKey = stream.type;
-          } else {
-            normalizedMetricKey = normalizedMetrics[stream.type];
-          }
-          if (ignoreMetrics.indexOf(normalizedMetricKey) < 0) {
-            availableMetrics.push(normalizedMetricKey);
-          }
-          stream.data.forEach(function (streamValue, index) {
-            coordinates[index][metrics[normalizedMetricKey].arrayPosition] = streamValue;
-            if (index === 0) {
-              aggregates[normalizedMetricKey + '_min'] = streamValue;
-              aggregates[normalizedMetricKey + '_max'] = streamValue;
-            } else {
-              if (streamValue < aggregates[normalizedMetricKey + '_min']) {
-                aggregates[normalizedMetricKey + '_min'] = streamValue;
-              }
-              if (streamValue > aggregates[normalizedMetricKey + '_max']) {
-                aggregates[normalizedMetricKey + '_max'] = streamValue;
-              }
-            }
-          });
-        } else {
-          console.log('No metric found: ' + stream.type + '. Skipping.');
+      for (i = 0; i < streams.length; i++) {
+        stream = streams[i];
+        if (stream.type === 'latlng') {
+          coordinatesStream = streams[i];
+          break;
         }
       }
+
+      coordinates = coordinatesStream.data.map(function (latLng) {
+        return [latLng[1], latLng[0]];
+      });
+
+      streams.forEach(function (stream) {
+        var normalizedMetricKey;
+        if (stream.type !== 'latlng') {  // We already handled latlng
+          if (stream.type in metrics || stream.type in normalizedMetrics) {
+            if (stream.type in metrics) {
+              normalizedMetricKey = stream.type;
+            } else {
+              normalizedMetricKey = normalizedMetrics[stream.type];
+            }
+            if (ignoreMetrics.indexOf(normalizedMetricKey) < 0) {
+              availableMetrics.push(normalizedMetricKey);
+            }
+
+            var total = 0;
+            var count = 0;
+
+            stream.data.forEach(function (streamValue, index) {
+              coordinates[index][metrics[normalizedMetricKey].arrayPosition] = streamValue;
+
+              total += streamValue;
+              count++;
+
+              if (index === 0) {
+                aggregates[normalizedMetricKey + '_min'] = streamValue;
+                aggregates[normalizedMetricKey + '_max'] = streamValue;
+              } else {
+                if (streamValue < aggregates[normalizedMetricKey + '_min']) {
+                  aggregates[normalizedMetricKey + '_min'] = streamValue;
+                }
+                if (streamValue > aggregates[normalizedMetricKey + '_max']) {
+                  aggregates[normalizedMetricKey + '_max'] = streamValue;
+                }
+              }
+            });
+
+            aggregates[normalizedMetricKey + '_avg'] = (total / count);
+          } else {
+            console.log('No metric found: ' + stream.type + '. Skipping.');
+          }
+        }
+      });
+
+      var feature = {
+        id         : workoutId,
+        type       : 'Feature',
+        properties : {
+          available_metrics : availableMetrics,
+          metrics           : metrics,
+          aggregates        : aggregates,
+          name              : activity.name,
+          notes             : activity.description,
+          start_date        : activity.start_date
+        },
+        geometry   : {
+          type        : 'LineString',
+          coordinates : coordinates
+        }
+      };
+
+      callback(null, feature);
     });
-
-    var feature = {
-      id         : workoutId,
-      type       : 'Feature',
-      properties : {
-        available_metrics : availableMetrics,
-        metrics           : metrics,
-        aggregates        : aggregates
-      },
-      geometry   : {
-        type        : 'LineString',
-        coordinates : coordinates
-      }
-    };
-
-    callback(null, feature);
   });
 }
 

@@ -112,3 +112,37 @@
 .workouts-table tr:hover {
   background-color: #b0b0b0 !important;
 }
+
+.workout-details {
+
+}
+
+.workout-details p {
+  padding: 0 10px;
+}
+
+.workout-details .back {
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.workout-details .metric {
+  margin-bottom: 12px;
+}
+
+.workout-details span.label {
+  font-size: 0.9em;
+  font-weight: normal;
+  width: 32%;
+  margin-right: 1%;
+  height: 35px;
+  line-height: 35px;
+}
+
+.workout-details .min-max-avg span.label:last-child {
+  margin-right: 0;
+}
+
+.workout-details span.label strong {
+  font-size: 1em;
+}

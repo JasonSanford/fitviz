@@ -19,6 +19,14 @@ function uaApiRequest (path, params, accessToken, callback) {
   request(options, callback);
 }
 
+function setAggregate (uaWorkout, aggregates, aggregate, value) {
+  if (aggregate in uaWorkout.aggregates) {
+    aggregates[aggregate] = uaWorkout.aggregates[aggregate];
+  } else {
+    aggregates[aggregate] = value;
+  }
+}
+
 function getWorkout (user, workoutId, callback) {
   var params = { field_set: 'time_series' };
   uaApiRequest('workout/' + workoutId, params, user.access_token, function (error, response, body) {
@@ -50,9 +58,14 @@ function getWorkout (user, workoutId, callback) {
       // Make a special loop to gather aggregates.
       //
       if (hasElevation) {
+        var total = 0;
+        var count = 0;
+
         Object.keys(positionsObj).forEach(function (positionsObjKey, index) {
           var position  = positionsObj[positionsObjKey];
           var elevation = position.elevation;
+          total += position.elevation;
+          count++;
           if (index === 0) {
             aggregates.elevation_min = elevation;
             aggregates.elevation_max = elevation;
@@ -65,6 +78,8 @@ function getWorkout (user, workoutId, callback) {
             }
           }
         });
+
+        aggregates.elevation_avg = (total / count);
       }
 
       var metricsKeys = Object.keys(metrics);
@@ -77,26 +92,50 @@ function getWorkout (user, workoutId, callback) {
           if (ignoreMetrics.indexOf(metricsKey) < 0) {
             // Don't worry about visualizing distance
             availableMetrics.push(metricsKey);
-          }
 
-          timeSeriesElement.forEach(function (position, index) {
-            var positionIndex = position[0];
-            var value         = position[1];
-            if (positionsObj[positionIndex]) {  // Only add time series info for known geographic positions
-              positionsObj[positionIndex][metricsKey] = value;
-              if (index === 0) {
-                aggregates[metricsKey + '_min'] = value;
-                aggregates[metricsKey + '_max'] = value;
-              } else {
-                if (value < aggregates[metricsKey + '_min']) {
-                  aggregates[metricsKey + '_min'] = value;
-                }
-                if (value > aggregates[metricsKey + '_max']) {
-                  aggregates[metricsKey + '_max'] = value;
+            var trustAggregates = (metricsKey + '_min') in body.aggregates &&
+              (metricsKey + '_max') in body.aggregates &&
+              (metricsKey + '_avg') in body.aggregates;
+
+            var total = 0;
+            var count = 0;
+
+            if (trustAggregates) {
+              //
+              // Metrics min/max/avg were returned by UA. Trust them.
+              aggregates[metricsKey + '_min'] = body.aggregates[metricsKey + '_min'];
+              aggregates[metricsKey + '_max'] = body.aggregates[metricsKey + '_max'];
+              aggregates[metricsKey + '_avg'] = body.aggregates[metricsKey + '_avg'];
+            }
+
+            timeSeriesElement.forEach(function (position, index) {
+              var positionIndex = position[0];
+              var value         = position[1];
+              if (positionsObj[positionIndex]) {  // Only add time series info for known geographic positions
+                positionsObj[positionIndex][metricsKey] = value;
+
+                if (!trustAggregates) {
+                  total += value;
+                  count++;
+                  if (index === 0) {
+                    setAggregate(body, aggregates, metricsKey + '_min', value);
+                    setAggregate(body, aggregates, metricsKey + '_max', value);
+                  } else {
+                    if (value < aggregates[metricsKey + '_min']) {
+                      setAggregate(body, aggregates, metricsKey + '_min', value);
+                    }
+                    if (value > aggregates[metricsKey + '_max']) {
+                      setAggregate(body, aggregates, metricsKey + '_max', value);
+                    }
+                  }
                 }
               }
+            });
+
+            if (!trustAggregates) {
+              setAggregate(body, aggregates, metricsKey + '_avg', (total / count));
             }
-          });
+          }
         }
       });
 
@@ -127,7 +166,10 @@ function getWorkout (user, workoutId, callback) {
       var properties = {
         available_metrics : availableMetrics,
         aggregates        : aggregates,
-        metrics           : metrics
+        metrics           : metrics,
+        name              : body.name,
+        notes             : body.notes,
+        start_date        : body.start_datetime
       };
       var geometry = {
         type: 'LineString',

@@ -45,6 +45,14 @@ VizApp.prototype.initEvents = function () {
     me.$leftDiv.html('<div class="spinner-container full-height"></div>');
     me.getWorkouts(parseInt($target.data('page'), 10));
   });
+
+  this.$leftDiv.on('click', '.back-to-workouts', function (event) {
+    event.preventDefault();
+    me.mapView.workoutDisplay.destroy();
+    me.mapView.setMetricsPickerVisibility(false);
+    me.$leftDiv.find('.workout-details').remove();
+    me.$leftDiv.find('.workouts').show();
+  });
 };
 
 VizApp.prototype.resetHeight = function () {
@@ -79,6 +87,7 @@ VizApp.prototype.getWorkoutCallback = function (error, response, body) {
     this.displayError(error);
   } else {
     var feature = body;
+    this.showWorkoutDetails(feature);
     this.mapView.displayWorkout(feature);
   }
   this.mapView.setLoading(false);
@@ -124,7 +133,13 @@ VizApp.prototype.getWorkoutsCallback = function (error, response, workouts, page
     }
     prevNextHtml = prevNextHtml.join('');
 
-    this.$leftDiv.html(workoutsTableHtml + '<h3>Page ' + page + '</h3><div class="prevnext">' + prevNextHtml + '</div>');
+    var workoutsHtml = '<div class="workouts">' +
+      workoutsTableHtml +
+      '<h3>Page ' + page + '</h3>' +
+      '<div class="prevnext">' + prevNextHtml + '</div>' +
+    '</div>';
+
+    this.$leftDiv.html(workoutsHtml);
     this.setLoading(false);
   }
 };
@@ -142,6 +157,136 @@ VizApp.prototype.showWorkout = function (workoutId) {
   var me = this;
   this.mapView.setLoading(true);
   this.getWorkout(workoutId);
+};
+
+VizApp.prototype.showWorkoutDetails = function (workout) {
+  this.$leftDiv.find('.workouts').hide();
+
+  function generateMetricHtml (metric, minMaxAvg, workout) {
+    var testMetricKey = metric.key + '_min';
+    if (! (testMetricKey in workout.properties.aggregates || (metric.key === 'pace' && 'speed_min' in workout.properties.aggregates))) {
+      //
+      // Skip this metric as it is not present.
+      return '';
+    } else {
+      var metricHtml = [];
+      metricHtml.push(
+        '<div class="row metric">' +
+            '<div><h4>' + metric.label + '</h4></div>' +
+              '<div class="min-max-avg">'
+      );
+      minMaxAvg.forEach(function (minOrMaxOrAvg) {
+        var unit = metric.unit ? (' ' + metric.unit) : '';
+        var aggregateKey = (function () {
+          if (metric.key === 'pace') {
+            return 'speed' + minOrMaxOrAvg.key;
+          } else {
+            return metric.key + minOrMaxOrAvg.key;
+          }
+        }());
+        var value = (function () {
+          var thisValue = workout.properties.aggregates[aggregateKey];
+          if (metric.key === 'pace') {
+            var minutesPerMile = utils.metersPerSecondToMinutesPerMile(thisValue);
+            var mMSS           = utils.minutesPerMileToMMSS(minutesPerMile);
+            return mMSS;
+          } else if (metric.key === 'speed') {
+            return utils.metersPerSecondToMilesPerHour(thisValue);
+          } else if (metric.key === 'elevation') {
+            return utils.metersToFeet(thisValue);
+          } else {
+            return thisValue;
+          }
+        }());
+
+        if ('precision' in metric) {
+          if (metric.precision === 0) {
+            value = Math.round(value);
+          } else {
+            value = value.toFixed(metric.precision);
+          }
+        }
+
+        if (aggregateKey in workout.properties.aggregates) {
+          metricHtml.push(
+            '<span class="default label">' +
+              minOrMaxOrAvg.label + ': ' + '<strong>' + value + '</strong>' + unit +
+            '</span>'
+          );
+        }
+      });
+      metricHtml.push(
+            '</div>' +
+        '</div>'
+      );
+      return metricHtml.join('');
+    }
+  }
+
+  var metrics = [
+    {
+      key: 'heartrate',
+      label: 'Heart Rate',
+      unit: 'bpm',
+      precision: 0
+    },
+    {
+      key: 'elevation',
+      label: 'Elevation',
+      unit: 'ft',
+      precision: 0
+    },
+    {
+      key: 'cadence',
+      label: 'Cadence',
+      precision: 0
+    }
+  ];
+  if ($('body').hasClass('underarmour')) {
+    metrics.push(
+      {
+        key: 'speed',
+        label: 'Speed',
+        unit: 'mph',
+        precision: 1
+      }
+    );
+  }
+  var minMaxAvg = [
+    {
+      key: '_min',
+      label: 'Min'
+    },
+    {
+      key: '_max',
+      label: 'Max'
+    },
+    {
+      key: '_avg',
+      label: 'Avg'
+    }
+  ];
+  var metricsHtml = [];
+  metrics.forEach(function (metric) {
+    metricsHtml.push(generateMetricHtml(metric, minMaxAvg, workout));
+    if (metric.key === 'speed') {
+      var paceMetric = {
+        key: 'pace',
+        label: 'Pace',
+        unit: 'min/mi'
+      };
+      metricsHtml.push(generateMetricHtml(paceMetric, minMaxAvg, workout));
+    }
+  });
+  metricsHtml = metricsHtml.join('');
+
+  var workoutDetailsHtml = '<div class="workout-details">' +
+    '<div class="back small info btn icon-left entypo icon-left-bold"><a class="back-to-workouts" href="#back">Back to Workouts</a></div>' +
+    '<h3>' + workout.properties.name + '</h3>' +
+    (workout.properties.notes ? '<p>' + workout.properties.notes + '</p>' : '') +
+    metricsHtml +
+  '</div>';
+  this.$leftDiv.append(workoutDetailsHtml);
 };
 
 VizApp.prototype.displayError = function (error) {
